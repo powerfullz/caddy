@@ -1,0 +1,23 @@
+services:
+  caddy:
+    image: ghcr.io/yourusername/yourrepo/caddy:latest
+    container_name: caddy
+    restart: unless-stopped
+    network_mode: host
+    
+    environment:
+      - CF_API_TOKEN=${CF_API_TOKEN}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      - /var/www/blog:/var/www/blog:ro
+      - ./logs:/var/log/caddy
+    
+    command: caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
+
+volumes:
+  caddy_data:
+  caddy_config:
