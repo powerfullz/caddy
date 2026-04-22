@@ -1,22 +1,32 @@
 services:
   caddy:
-    image: ghcr.io/yourusername/yourrepo/caddy:latest
+    image: ghcr.io/powerfullz/caddy:latest
     container_name: caddy
     restart: unless-stopped
     network_mode: host
-    
-    environment:
-      - CF_API_TOKEN=${CF_API_TOKEN}
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
-    
+    env_file: .env
+
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
       - /var/www/blog:/var/www/blog:ro
       - ./logs:/var/log/caddy
-    
+
     command: caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
+
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:2019/config/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   caddy_data:

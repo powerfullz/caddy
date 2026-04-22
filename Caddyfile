@@ -1,0 +1,154 @@
+{
+        acme_ca https://acme.zerossl.com/v2/DV90
+        email webmaster@l3zc.com
+        acme_dns cloudflare "{$CF_API_TOKEN}"
+
+        order replace after encode
+        order handle_errors after file_server
+
+        storage redis {
+                host "{$REDIS_HOST}"
+                port 6379
+                password "{$REDIS_PASSWORD}"
+                db 0
+                key_prefix "caddy"
+                tls_enabled true
+                tls_insecure false
+        }
+
+        log {
+                output file /var/log/caddy/caddy.log {
+                        roll_size 500MiB
+                        roll_keep 3
+                }
+                format console
+                exclude http.log.access
+        }
+
+        log main {
+                output file /var/log/caddy/access.log {
+                        roll_size 500MiB
+                        roll_keep 3
+                }
+                include http.log.access
+        }
+
+        layer4 {
+                :1688 {
+                        route {
+                                proxy ovh-fra.tail351a12.ts.net:1688
+                        }
+                }
+        }
+}
+
+(hsts) {
+        header {
+                Permissions-Policy "interest-cohort=()"
+                Strict-Transport-Security "max-age=15552000; includeSubDomains; preload"
+                X-Content-Type-Options "nosniff"
+        }
+}
+
+*.l3zc.com {
+        import hsts
+        log main
+
+        @blog host blog.l3zc.com
+        handle @blog {
+                @noindex path /tags/* /en/tags/* /ja/tags/* /zh-hant-hk/tags/*
+                header @noindex X-Robots-Tag "noindex"
+                header X-Frame-Options "DENY"
+
+                replace {
+                        match {
+                                header Content-Type text/html*
+                                header Content-Type application/javascript*
+                        }
+                        "cdn.jsdelivr.net" "cdn.jsdmirror.com"
+                }
+
+                root * /var/www/blog
+                encode br zstd gzip
+                file_server
+
+                handle_errors 404 {
+                        rewrite * /404.html
+                        file_server
+                }
+        }
+
+        @stats host stats.l3zc.com
+        handle @stats {
+                reverse_proxy http://ovh-fra.tail351a12.ts.net:3000
+        }
+
+        @comment host comment.l3zc.com
+        handle @comment {
+                reverse_proxy http://ovh-fra.tail351a12.ts.net:8079
+        }
+
+        @lobe host lobe.l3zc.com
+        handle @lobe {
+                reverse_proxy http://ovh-fra.tail351a12.ts.net:3210
+        }
+
+        @minio host minio.l3zc.com
+        handle @minio {
+                handle_path /dashboard/* {
+                        reverse_proxy http://ovh-fra.tail351a12.ts.net:9001
+                }
+
+                reverse_proxy http://ovh-fra.tail351a12.ts.net:9000
+        }
+
+        @ai_auth host ai-auth.l3zc.com
+        handle @ai_auth {
+                reverse_proxy http://ovh-fra.tail351a12.ts.net:8000
+        }
+
+        @memos host memos.l3zc.com
+        handle @memos {
+                reverse_proxy http://ovh-fra.tail351a12.ts.net:5230
+        }
+
+        @tz host tz.l3zc.com
+        handle @tz {
+                @grpcProto {
+                        path /proto.NezhaService/*
+                }
+
+                reverse_proxy @grpcProto {
+                        header_up Host {host}
+                        header_up nz-realip {remote_host}
+                        transport http {
+                                versions h2c
+                                read_buffer 4096
+                        }
+                        to http://ovh-fra.tail351a12.ts.net:8008
+                }
+
+                reverse_proxy {
+                        header_up Host {host}
+                        header_up Origin https://{host}
+                        header_up nz-realip {remote_host}
+                        transport http {
+                                read_buffer 16384
+                        }
+                        to http://ovh-fra.tail351a12.ts.net:8008
+                }
+        }
+
+        handle_errors 404 {
+                @is_blog host blog.l3zc.com
+                handle @is_blog {
+                        root * /var/www/blog
+                        rewrite * /404.html
+                        file_server
+                }
+        }
+
+        handle {
+                abort
+        }
+}
