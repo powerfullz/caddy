@@ -1,0 +1,4 @@
+@git host git.l3zc.com
+handle @git {
+        reverse_proxy :5530
+}

@@ -3,15 +3,6 @@ handle @blog {
         @noindex path /tags/* /en/tags/* /ja/tags/* /zh-hant-hk/tags/*
         header @noindex X-Robots-Tag "noindex"
         header X-Frame-Options "DENY"
-
-        replace {
-                match {
-                        header Content-Type text/html*
-                        header Content-Type application/javascript*
-                }
-                "cdn.jsdelivr.net" "cdn.jsdmirror.com"
-        }
-
         root * /var/www/blog
         encode br zstd gzip
         file_server
