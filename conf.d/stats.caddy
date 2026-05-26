@@ -1,0 +1,4 @@
+@stats host stats.l3zc.com
+handle @stats {
+        reverse_proxy http://ovh-fra.tail351a12.ts.net:3000
+}

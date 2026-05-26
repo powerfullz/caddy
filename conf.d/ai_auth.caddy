@@ -1,0 +1,4 @@
+@ai_auth host ai-auth.l3zc.com
+handle @ai_auth {
+        reverse_proxy http://ovh-fra.tail351a12.ts.net:8000
+}

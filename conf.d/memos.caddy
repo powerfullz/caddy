@@ -1,0 +1,4 @@
+@memos host memos.l3zc.com
+handle @memos {
+        reverse_proxy http://ovh-fra.tail351a12.ts.net:5230
+}

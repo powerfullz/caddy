@@ -1,0 +1,26 @@
+@tz host tz.l3zc.com
+handle @tz {
+        @grpcProto {
+                path /proto.NezhaService/*
+        }
+
+        reverse_proxy @grpcProto {
+                header_up Host {host}
+                header_up nz-realip {remote_host}
+                transport http {
+                        versions h2c
+                        read_buffer 4096
+                }
+                to http://ovh-fra.tail351a12.ts.net:8008
+        }
+
+        reverse_proxy {
+                header_up Host {host}
+                header_up Origin https://{host}
+                header_up nz-realip {remote_host}
+                transport http {
+                        read_buffer 16384
+                }
+                to http://ovh-fra.tail351a12.ts.net:8008
+        }
+}
