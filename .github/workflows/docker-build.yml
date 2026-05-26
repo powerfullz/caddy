@@ -5,7 +5,8 @@ on:
     branches: [main]
     paths: [Dockerfile, .github/workflows/docker-build.yml]
   workflow_dispatch:
-
+  schedule:
+    - cron: '0 0 * * 0'
 permissions:
   contents: read
   packages: write
