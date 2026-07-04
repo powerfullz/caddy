@@ -11,7 +11,7 @@ handle @tz {
                         versions h2c
                         read_buffer 4096
                 }
-                to http://ovh-fra.tail351a12.ts.net:8008
+                to :8008
         }
 
         reverse_proxy {
@@ -21,6 +21,6 @@ handle @tz {
                 transport http {
                         read_buffer 16384
                 }
-                to http://ovh-fra.tail351a12.ts.net:8008
+                to :8008
         }
 }

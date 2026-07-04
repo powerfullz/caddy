@@ -1,4 +1,4 @@
 @lobe host lobe.l3zc.com
 handle @lobe {
-        reverse_proxy http://ovh-fra.tail351a12.ts.net:3210
+        reverse_proxy :3210
 }

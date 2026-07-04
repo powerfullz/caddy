@@ -1,8 +1,8 @@
 @minio host minio.l3zc.com
 handle @minio {
         handle_path /dashboard/* {
-                reverse_proxy http://ovh-fra.tail351a12.ts.net:9001
+                reverse_proxy :9001
         }
 
-        reverse_proxy http://ovh-fra.tail351a12.ts.net:9000
+        reverse_proxy :9000
 }
